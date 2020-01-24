@@ -1,14 +1,19 @@
 from Category import Category
 import sys
+from collections import defaultdict
+import numpy as np
 
+LAMBDA = 0.0
 TOKEN = '@@@@@@@@@@'
-categories = []
+START = '<S> ' 
 
+categories = []
+test_set_sentences = []
 
 def add_to_categories(line):
     category_name = line[0]
     category_sentence = line[1]
-
+    category_sentence = START + category_sentence
     if category_name not in categories:
         categories.append(Category(category_name))
 
@@ -18,31 +23,72 @@ def add_to_categories(line):
 def save_file(file_name, words_list):
     f = open(file_name, 'w')
     for word in words_list:
-        f.write(str(word[0]) +  ' ' + str(word[1]) + '\n')
+        f.write(str(word[0]) + ' ' + str(word[1]) + '\n')
     f.close()
+
 
 def save_ngrams_to_file():
     for category in categories:
-        save_file('./Ngrams/' + category.get_name() + '-1.txt', category.get_unigrams().items())
-        save_file('./Ngrams/' + category.get_name() + '-2.txt', category.get_bigrams().items())
+        save_file('./Ngrams/' + category.get_name() +
+                  '-1.txt', category.get_unigrams().items())
+        save_file('./Ngrams/' + category.get_name() +
+                  '-2.txt', category.get_bigrams().items())
 
 
-
-def main(file_path="./dataset/HAM-Train.txt"):
+def create_ngrams(file_path="./dataset/HAM-Train.txt"):
     try:
         f = open(file_path, 'r')
         print('file opened...')
     except OSError as e:
         print('error in opening training file, error message is: ' + e.strerror)
         sys.exit()
-    i=0
+    line_number = 0
     for line in f:
-        i+=1
-        print(i)
-        add_to_categories(line.split((TOKEN)))
+        line_number += 1
+        print(line_number)
+        add_to_categories(line.split(TOKEN))
+    f.close()
 
-    save_ngrams_to_file()
+    for category in categories:
+        category.set_probability(line_number)
+        print(category)
 
+    # save_ngrams_to_file()
+
+
+def read_test_set(file_path="./dataset/HAM-Test.txt"):
+    try:
+        f = open(file_path, 'r')
+        print('test set is oppened...')
+    except OSError as e:
+        print('can not open test set, error message is ' + e.strerror )
+    for (line_n, line) in enumerate(f):
+        line = line.split(TOKEN)
+        test_set_sentences.append([line[0], float('-inf'), '', 0])
+        line[1] = START + line[1]
+        for category in categories:
+            words = line[1].split()
+            line_p = 0
+            for index in range(1, len(words)) :
+                line_p = category.set_p(LAMBDA, (words[index - 1], words[index]))
+            if  line_p + category.get_p() > test_set_sentences[line_n][1]:
+                test_set_sentences[line_n][1] = line_p + category.get_p()
+                test_set_sentences[line_n][2] = category.get_name()        
+        test_set_sentences[line_n][3] = np.random.choice(categories,1)
+    c = 0
+    c2 = 0
+    for i in test_set_sentences:
+        if i[0] == i[2]: c += 1 
+        if i[0] == i[3]: c2 += 1
+    print(c, c2) 
+    
+def calc_fscore():
+    pass
+
+def main():
+    create_ngrams()
+    read_test_set()
+    calc_fscore()
 
 if __name__ == "__main__":
     main()
