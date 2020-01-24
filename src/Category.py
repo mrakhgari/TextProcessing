@@ -12,9 +12,15 @@ class Category:
         self.__unigram = {}
         self.__bigram = {}
         self.__probability = 0
+        self.__TP = 0
+        self.__FP = 0
+        self.__FN = 0
+        self.__f_measure = 0
+        self.__recall = 0
+        self.__precision = 0
 
     def __str__(self):
-        return str(self.__name) + ' ' + str(self.__probability)
+        return str(self.__name) + ' recall is: ' + str(self.__recall) + ' precision is: ' + str(self.__precision) + ' f is: ' + str(self.__f_measure)
 
     # check that two Category has same name or not?
     def __eq__(self, other):
@@ -23,6 +29,30 @@ class Category:
         if not isinstance(other, Category):
             return False
         return self.__name == other.__name
+
+    def add_FP(self):
+        self.__FP += 1
+
+    def add_FN(self):
+        self.__FN += 1
+
+    def add_TP(self):
+        self.__TP += 1
+
+    def set_precision(self):
+        self.__precision = self.__TP / (self.__TP + self.__FN)
+
+    def set_recall(self):
+        self.__recall = self.__TP / (self.__TP + self.__FP)
+
+    def get_f(self):
+        return self.__f_measure
+
+    def f_measure(self):
+        self.set_recall()
+        self.set_precision()
+        self.__f_measure = (2 * self.__recall * self.__precision) / \
+            (self.__recall + self.__precision)
 
     def __hash__(self):
         return hash(self.__name)
@@ -61,13 +91,13 @@ class Category:
         # self.__probability = self.__probability / count
 
     def set_p(self, LAMBDA, word):
-        ci_1 = 0 
+        ci_1 = 0
         if self.__unigram.get(word[0]) is not None:
             ci_1 = self.__unigram[word[0]]
-        ci = 0 
+        ci = 0
         if self.__unigram.get(word[1]) is not None:
             ci = self.__unigram[word[1]]
-        
+
         pi = 0
         if ci != 0:
             pi = log(ci / self.__number_of_words)

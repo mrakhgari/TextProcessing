@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 import numpy as np
 
-LAMBDA = 0.5
+LAMBDA = 0
 TOKEN = '@@@@@@@@@@'
 START = '<S> ' 
 
@@ -64,34 +64,42 @@ def read_test_set(file_path="./dataset/HAM-Test.txt"):
         print('can not open test set, error message is ' + e.strerror )
     for (line_n, line) in enumerate(f):
         line = line.split(TOKEN)
-        test_set_sentences.append([line[0], float('-inf'), '', 0])
+        test_set_sentences.append([line[0], 0, ''])
         line[1] = START + line[1]
         for category in categories:
             words = line[1].split()
             line_p = 0
             for index in range(1, len(words)) :
                 line_p += category.set_p(LAMBDA, (words[index - 1], words[index]))
-            if  line_p + category.get_p() > test_set_sentences[line_n][1]:
+            if  line_p + category.get_p() < test_set_sentences[line_n][1]:
                 test_set_sentences[line_n][1] = line_p + category.get_p()
                 test_set_sentences[line_n][2] = category.get_name()        
-        test_set_sentences[line_n][3] = np.random.choice(categories,1)
-    c = 0
-    c2 = 0
-    for i in test_set_sentences:
-        if i[0] == i[2]: c += 1 
-        if i[0] == i[3]: c2 += 1
-    print(c, c2) 
     
 def calc_fscore():
-    table = [[]]
-    # for i in
-    pass
+    for instance in test_set_sentences:
+        if instance[0] == instance[2]:
+            for topic in categories:
+                if topic == instance[0]:
+                    topic.add_TP()
+                    break
+        else:
+            for topic in categories:
+                if topic == instance[0]:
+                    topic.add_FN()
+                elif topic == instance[2]:
+                    topic.add_FP()
+    for topic in categories:
+        topic.f_measure()
 
 def main():
     create_ngrams()
     read_test_set()
     calc_fscore()
+    f = open(str(LAMBDA) + 'result.txt ', 'w')
+    for topic in categories:
+        f.write(str(topic) + '\n')
+        print(topic)
+    f.close()
 
 if __name__ == "__main__":
     main()
-    print('end')
