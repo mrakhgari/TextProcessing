@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 import numpy as np
 
-LAMBDA = 0.0
+LAMBDA = 0.5
 TOKEN = '@@@@@@@@@@'
 START = '<S> ' 
 
@@ -70,7 +70,7 @@ def read_test_set(file_path="./dataset/HAM-Test.txt"):
             words = line[1].split()
             line_p = 0
             for index in range(1, len(words)) :
-                line_p = category.set_p(LAMBDA, (words[index - 1], words[index]))
+                line_p += category.set_p(LAMBDA, (words[index - 1], words[index]))
             if  line_p + category.get_p() > test_set_sentences[line_n][1]:
                 test_set_sentences[line_n][1] = line_p + category.get_p()
                 test_set_sentences[line_n][2] = category.get_name()        
@@ -83,6 +83,8 @@ def read_test_set(file_path="./dataset/HAM-Test.txt"):
     print(c, c2) 
     
 def calc_fscore():
+    table = [[]]
+    # for i in
     pass
 
 def main():
@@ -92,5 +94,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
     print('end')
