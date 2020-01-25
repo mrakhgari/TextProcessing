@@ -3,7 +3,7 @@
 # Category class, contains name of class (category's name) and unigram and bigram of senctences.
 
 from math import log
-
+LAMBDA2 = 0.9
 
 class Category:
     def __init__(self, category_name):
@@ -43,7 +43,9 @@ class Category:
         self.__precision = self.__TP / (self.__TP + self.__FN)
 
     def set_recall(self):
+        print(self.__name)
         self.__recall = self.__TP / (self.__TP + self.__FP)
+        print(self.__recall)
 
     def get_f(self):
         return self.__f_measure
@@ -91,22 +93,23 @@ class Category:
         # self.__probability = self.__probability / count
 
     def set_p(self, LAMBDA, word):
-        ci_1 = 0
+        ci_1 = 1
         if self.__unigram.get(word[0]) is not None:
             ci_1 = self.__unigram[word[0]]
-        ci = 0
+        ci = 1
         if self.__unigram.get(word[1]) is not None:
             ci = self.__unigram[word[1]]
-
-        pi = 0
-        if ci != 0:
             pi = log(ci / self.__number_of_words)
-        ci_1ci = 0
-        pi_1pi = 0
-        if self.__bigram.get(word[0] + ' ' + word[1]) is not None and ci_1 != 0:
+        else:
+            pi = -1000
+
+        if self.__bigram.get(word[0] + ' ' + word[1]) is not None :
             ci_1ci = self.__bigram.get(word[0] + ' ' + word[1])
             pi_1pi = log(ci_1ci / ci_1)
-        return LAMBDA*pi + (1-LAMBDA) * pi_1pi
+        else:
+            pi_1pi = -1000
+        # return LAMBDA*(LAMBDA2 * pi + (1-LAMBDA2)/self.__number_of_words)+ (1-LAMBDA) * pi_1pi
 
+        return LAMBDA * pi + (1-LAMBDA)* pi_1pi
     def get_p(self):
         return self.__probability

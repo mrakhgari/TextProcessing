@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 import numpy as np
 
-LAMBDA = 0
+LAMBDA = 0.5
 TOKEN = '@@@@@@@@@@'
 START = '<S> ' 
 
@@ -64,14 +64,14 @@ def read_test_set(file_path="./dataset/HAM-Test.txt"):
         print('can not open test set, error message is ' + e.strerror )
     for (line_n, line) in enumerate(f):
         line = line.split(TOKEN)
-        test_set_sentences.append([line[0], 0, ''])
+        test_set_sentences.append([line[0], float('-inf'), ''])
         line[1] = START + line[1]
         for category in categories:
             words = line[1].split()
             line_p = 0
             for index in range(1, len(words)) :
                 line_p += category.set_p(LAMBDA, (words[index - 1], words[index]))
-            if  line_p + category.get_p() < test_set_sentences[line_n][1]:
+            if  line_p + category.get_p() > test_set_sentences[line_n][1]:
                 test_set_sentences[line_n][1] = line_p + category.get_p()
                 test_set_sentences[line_n][2] = category.get_name()        
     
@@ -94,6 +94,34 @@ def calc_fscore():
 def main():
     create_ngrams()
     read_test_set()
+    cnt = 0
+    cc = 0
+    eq = 0
+    ej = 0
+    si = 0
+    ad = 0 
+    va = 0
+    for c in test_set_sentences:
+        if c[0] == c[2]:
+            cnt += 1 
+        if c[2] == 'اجتماعی':
+            ej += 1
+        if c[2] == 'اقتصاد':
+            eq += 1
+        if c[2] == 'ادب و هنر' :
+            ad +=1
+        if c[2] == 'سیاسی':
+            si +=1
+        if c[2] == 'ورزش':
+            va += 1
+    
+    print(cnt)
+
+    print(ej)
+    print(eq)
+    print(ad)
+    print(si)
+    print(va)
     calc_fscore()
     f = open(str(LAMBDA) + 'result.txt ', 'w')
     for topic in categories:
