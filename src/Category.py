@@ -43,9 +43,7 @@ class Category:
         self.__precision = self.__TP / (self.__TP + self.__FN)
 
     def set_recall(self):
-        print(self.__name)
         self.__recall = self.__TP / (self.__TP + self.__FP)
-        print(self.__recall)
 
     def get_f(self):
         return self.__f_measure
@@ -99,17 +97,17 @@ class Category:
         ci = 1
         if self.__unigram.get(word[1]) is not None:
             ci = self.__unigram[word[1]]
-            pi = log(ci / self.__number_of_words)
+            pi = log(LAMBDA * ci / self.__number_of_words)
         else:
             pi = -1000
 
         if self.__bigram.get(word[0] + ' ' + word[1]) is not None :
             ci_1ci = self.__bigram.get(word[0] + ' ' + word[1])
-            pi_1pi = log(ci_1ci / ci_1)
+            pi_1pi = log((1-LAMBDA)*ci_1ci / ci_1)
         else:
             pi_1pi = -1000
         # return LAMBDA*(LAMBDA2 * pi + (1-LAMBDA2)/self.__number_of_words)+ (1-LAMBDA) * pi_1pi
 
-        return LAMBDA * pi + (1-LAMBDA)* pi_1pi
+        return  pi + pi_1pi
     def get_p(self):
         return self.__probability

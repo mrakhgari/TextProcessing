@@ -1,9 +1,9 @@
-from Category import Category
+﻿from Category import Category
 import sys
 from collections import defaultdict
 import numpy as np
 
-LAMBDA = 0.5
+LAMBDA = 0.7
 TOKEN = '@@@@@@@@@@'
 START = '<S> ' 
 
